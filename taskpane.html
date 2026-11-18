@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEPA Plain Writer</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="pane">
+<header class="bar">
+  <h1>NEPA Plain Writer</h1>
+  <button id="gear" title="My Grammarly words and settings">Settings</button>
+</header>
+<div class="wrap">
+  <div id="settings" class="card settings hidden"><div id="settingsBody"></div></div>
+  <div class="card">
+    <select id="doctype" aria-label="Document type" style="width:100%;margin-bottom:8px"></select>
+    <select id="audience" aria-label="Who is reading" style="width:100%;margin-bottom:8px"></select>
+    <div class="row">
+      <button id="checkDoc" class="primary">Check document</button>
+      <button id="checkSel">Check selection</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label for="mode" class="legend">Show issues as</label>
+      <select id="mode">
+        <option value="underline">Coloured underlines (not saved in file)</option>
+        <option value="highlight">Highlights (saved until removed)</option>
+        <option value="list">List only</option>
+      </select>
+      <button id="clearMarks" class="ghost">Remove marks</button>
+    </div>
+    <label class="legend" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="auto" checked> Re-check automatically as I type</label>
+    <div id="status" class="status">Loading...</div>
+  </div>
+  <div class="card care" id="care"></div>
+  <div class="card" id="summary"></div>
+  <div id="list"></div>
+  <p class="legend">Underline colours in Word: berry = CARE and NEPA style · red = spelling · blue = grammar and SAA citations · lavender = wordy and my style · green = plain language and science communication. Checks run inside Word on this computer; your document is not sent anywhere.</p>
+</div>
+<script type="module" src="js/word.js"></script>
+</body>
+</html>

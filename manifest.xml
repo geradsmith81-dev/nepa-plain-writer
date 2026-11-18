@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+           xsi:type="TaskPaneApp">
+  <Id>ce9e3e76-2d02-513a-8d4c-1d016136812d</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Gerad Smith</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="NEPA Plain Writer"/>
+  <Description DefaultValue="Spelling, grammar and NEPA plain-language (concision) checker. Runs on your computer; text is not sent anywhere."/>
+  <IconUrl DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/icons/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/icons/icon-128.png"/>
+  <SupportUrl DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/index.html"/>
+  <AppDomains>
+    <AppDomain>https://geradsmith81-dev.github.io</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Document"/>
+  </Hosts>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/taskpane.html"/>
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Document">
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Description"/>
+            <LearnMoreUrl resid="Home.Url"/>
+          </GetStarted>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="NPW.Group">
+                <Label resid="Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16"/>
+                  <bt:Image size="32" resid="Icon.32"/>
+                  <bt:Image size="80" resid="Icon.80"/>
+                </Icon>
+                <Control xsi:type="Button" id="NPW.Open">
+                  <Label resid="Button.Label"/>
+                  <Supertip>
+                    <Title resid="Button.Label"/>
+                    <Description resid="Button.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>NPWPane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16" DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/icons/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/icons/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/icons/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/taskpane.html"/>
+        <bt:Url id="Home.Url" DefaultValue="https://geradsmith81-dev.github.io/nepa-plain-writer/index.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="NEPA Plain Writer is ready"/>
+        <bt:String id="Group.Label" DefaultValue="NEPA Plain Writer"/>
+        <bt:String id="Button.Label" DefaultValue="NEPA Check"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="On the Home tab, click NEPA Check to check spelling, grammar and NEPA concision."/>
+        <bt:String id="Button.Tooltip" DefaultValue="Open the NEPA Plain Writer checker."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

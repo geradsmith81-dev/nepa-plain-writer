@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEPA Plain Writer</title>
+<meta name="description" content="Spelling, grammar and NEPA plain-language checker">
+<meta name="theme-color" content="#0b5f5a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-64.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NEPA Writer">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="bar">
+  <h1>NEPA Plain Writer <small>CARE · NEPA · plain science</small></h1>
+  <button id="gear" title="Settings and my Grammarly words">My words &amp; settings</button>
+</header>
+<div class="wrap">
+  <div id="settings" class="card settings hidden"><div id="settingsBody"></div></div>
+  <div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <select id="doctype" aria-label="Document type"></select>
+      <select id="audience" aria-label="Who is reading"></select>
+      <button id="paste">Paste</button>
+      <button id="check" class="primary">Check</button>
+      <button id="copy">Copy text</button>
+      <button id="clear" class="ghost">Clear</button>
+    </div>
+    <textarea id="input" spellcheck="false" placeholder="Type here, or copy text from any program and press Paste.">It should be noted that the APE is located in close proximity to the Tanana River. In order to make a determination of effect, a Phase I survey was conducted by the project archaeologist prior to construction. The survey will utilize shovel tests, and impacts would be minimal. Elders say the prehistoric camp was used for fishing (Holmes, 2001). No objections were received from the Tribe.</textarea>
+    <div id="status" class="status"></div>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="card care" id="care"></div>
+      <div class="card" id="summary"></div>
+      <div class="card"><div id="review"></div>
+        <p class="legend">Underlines: <span style="color:var(--care)">gold</span> CARE · <span style="color:var(--spelling)">red</span> spelling · <span style="color:var(--grammar)">blue</span> grammar · <span style="color:var(--concise)">purple</span> wordy · <span style="color:var(--plain)">green</span> plain language · <span style="color:var(--scicomm)">olive</span> science communication · <span style="color:var(--cite)">teal</span> SAA citations · <span style="color:var(--voice)">indigo</span> my style · <span style="color:var(--nepa)">pink</span> NEPA style · grey-blue background = long sentence. Tap an underline to see the fix.</p>
+      </div>
+    </div>
+    <div class="card" id="list"></div>
+  </div>
+  <p class="legend">Checks run on this device. Your text is never sent anywhere. Spelling and grammar engine: Harper (Apache-2.0).</p>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

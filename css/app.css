@@ -1,0 +1,80 @@
+:root{--care:#b88700;--scicomm:#498205;--cite:#005b70;--voice:#4f6bed;--bg:#f6f7f9;--card:#fff;--ink:#1f2328;--muted:#5b616b;--line:#d9dde3;--accent:#0b5f5a;--accent2:#e6f2f1;
+--spelling:#d13438;--grammar:#0f6cbd;--concise:#8764b8;--plain:#107c10;--nepa:#c239b3;--personal:#ca5010;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+header.bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--accent);color:#fff;position:sticky;top:0;z-index:5}
+header.bar h1{font-size:17px;margin:0;font-weight:600;flex:1}
+header.bar small{opacity:.85;font-weight:400}
+button,select,input,textarea{font:inherit}
+button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.ghost{background:transparent;border-color:transparent;color:inherit}
+header.bar button{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+.wrap{max-width:1200px;margin:0 auto;padding:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+textarea#input{width:100%;min-height:180px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;line-height:1.5}
+.status{color:var(--muted);font-size:13px;min-height:18px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:900px){.grid{grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr)}}
+#review{white-space:pre-wrap;line-height:1.7;font-size:15.5px;min-height:60px}
+mark{background:transparent;color:inherit;border-bottom:2.5px solid;cursor:pointer;padding:0 1px;border-radius:2px}
+mark.k-spelling{border-color:var(--spelling);background:#fde7e8}
+mark.k-grammar{border-color:var(--grammar);background:#e3eefa}
+mark.k-concise{border-color:var(--concise);background:#efe9f8}
+mark.k-plain{border-color:var(--plain);background:#e5f3e5}
+mark.k-nepa{border-color:var(--nepa);background:#f9e6f6}
+mark.k-personal{border-color:var(--personal);background:#fcebdf}
+mark.active{outline:2px solid var(--ink)}
+.long{background:#eef2f7}
+mark.k-care{border-color:var(--care);background:#fff1c2;border-bottom-width:3px}
+mark.k-scicomm{border-color:var(--scicomm);background:#eaf3dc}
+mark.k-cite{border-color:var(--cite);background:#e0f1f4}
+mark.k-voice{border-color:var(--voice);background:#e8ebfa}
+.issue.k-care{border-left-color:var(--care);background:#fffbef}.issue.k-scicomm{border-left-color:var(--scicomm)}
+.issue.k-cite{border-left-color:var(--cite)}.issue.k-voice{border-left-color:var(--voice)}
+.care{border:2px solid var(--care);background:#fffdf5}
+.care-head{margin-bottom:6px}
+.care-row{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-top:1px solid #f0e6c8}
+.care-row.ok .care-letter{background:#107c10}
+.care-letter{flex:none;width:28px;height:28px;border-radius:50%;background:var(--care);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+.care-state{font-size:13px;color:var(--muted)}
+.care-ask{font-size:13px;margin-top:2px}
+.stat.warn b{color:var(--spelling)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;background:#fff;cursor:pointer;user-select:none}
+.chip .dot{width:10px;height:10px;border-radius:50%}
+.chip.off{opacity:.45;text-decoration:line-through}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px}
+.stat{background:var(--bg);border-radius:8px;padding:6px 8px}
+.stat b{display:block;font-size:18px}
+.stat span{font-size:12px;color:var(--muted)}
+.meter{height:8px;border-radius:6px;background:#e7e9ed;overflow:hidden;margin-top:4px}
+.meter i{display:block;height:100%;background:var(--accent)}
+.meter.over i{background:var(--spelling)}
+.issue{border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;padding:8px 10px;margin:8px 0;background:#fff}
+.issue.k-spelling{border-left-color:var(--spelling)}.issue.k-grammar{border-left-color:var(--grammar)}
+.issue.k-concise{border-left-color:var(--concise)}.issue.k-plain{border-left-color:var(--plain)}
+.issue.k-nepa{border-left-color:var(--nepa)}.issue.k-personal{border-left-color:var(--personal)}
+.issue.sel{box-shadow:0 0 0 2px var(--accent)}
+.issue .kind{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.issue .prob{font-weight:600;word-break:break-word}
+.issue .prob.longtext{font-weight:400;font-style:italic;color:var(--muted);max-height:4.5em;overflow:hidden}
+.issue .msg{margin:4px 0}
+.issue .src{font-size:12px;color:var(--muted)}
+.issue .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.issue .acts button{min-height:32px;padding:4px 10px;font-size:14px}
+.issue .acts button.fix{background:var(--accent2);border-color:#b7d8d5;font-weight:600}
+@media(min-width:900px){#list{max-height:calc(100vh - 140px);overflow:auto}}
+.settings label{display:block;margin:8px 0 4px;font-weight:600}
+.settings textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:8px}
+.settings input[type=number]{width:90px}
+.wordlist{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px;font-size:13px;background:var(--bg)}
+.wordlist span{display:inline-block;margin:2px;padding:1px 6px;border-radius:6px;background:#fff;border:1px solid var(--line)}
+.wordlist span b{cursor:pointer;color:var(--spelling);margin-left:4px}
+.hidden{display:none!important}
+.legend{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1f2328;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;z-index:20}
+body.pane .wrap{padding:8px}
+body.pane header.bar h1{font-size:15px}
