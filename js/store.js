@@ -3,7 +3,7 @@ import { parseWordList, parseSwaps } from './rules.js';
 const KEY = 'nepa-plain-writer-v1';
 const DEFAULTS = {
   words: [], swapsText: '', docType: 'ea', audience: 'technical', wordsPerPage: 500, longLimit: 25,
-  enabled: {care: true, spelling: true, grammar: true, concise: true, plain: true, scicomm: true, cite: true, voice: true, nepa: true, personal: true, passive: true, filler: true, long: true}
+  enabled: {care: true, spelling: true, grammar: true, concise: true, plain: true, scicomm: true, cite: true, voice: true, craft: true, nepa: true, personal: true, passive: true, filler: true, long: true}
 };
 let cache = null;
 export function settings() {

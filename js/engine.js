@@ -7,6 +7,7 @@ import { checkRules, docStats, KIND_INFO } from './rules.js';
 import { checkCare, careChecklist } from './care.js';
 import { checkVoice } from './voice.js';
 import { checkSciComm } from './scicomm.js';
+import { checkGuides, craftChecklist } from './guides.js';
 import { checkSaa, buildCiteIndex, isReferenceEntry } from './saa.js';
 import { settings, personalWordSet, allPersonalWords, setSharedWords } from './store.js';
 
@@ -67,7 +68,7 @@ function charToUnitMap(text) {
 }
 
 // Which flag wins where two overlap. Specific rules (CARE, SAA, your style) beat the general spell checker on the same words.
-const PRIORITY = {care: 0, cite: 1, voice: 2, spelling: 3, grammar: 4, personal: 5, nepa: 6, concise: 7, scicomm: 8, plain: 9};
+const PRIORITY = {care: 0, cite: 1, voice: 2, craft: 3, spelling: 4, grammar: 5, personal: 6, nepa: 7, concise: 8, scicomm: 9, plain: 10};
 
 export async function checkText(text, extra = {}) {
   await initEngine();
@@ -113,6 +114,7 @@ export async function checkText(text, extra = {}) {
   if (st.enabled.cite !== false) issues.push(...checkSaa(text, ctx));
   if (st.enabled.voice !== false) issues.push(...checkVoice(text, ctx));
   if (st.enabled.scicomm !== false && !ctx.isRef) issues.push(...checkSciComm(text, ctx));
+  if (st.enabled.craft !== false) issues.push(...checkGuides(text, ctx));
   return dedupe(issues);
 }
 
@@ -142,7 +144,7 @@ export function underlineSet(issues) {
 }
 
 export function applyFix(text, fix) { return text.slice(0, fix.start) + fix.text + text.slice(fix.end); }
-export { docStats, KIND_INFO, careChecklist, buildCiteIndex };
+export { docStats, KIND_INFO, careChecklist, buildCiteIndex, craftChecklist };
 // A fresh shared context for checking one document paragraph by paragraph.
 export function documentContext(docText) {
   return {docText, knownAcronyms: new Set(), seenSpecies: new Set(), seenSentences: new Map(), seenJargon: new Set(), citeIndex: buildCiteIndex(docText)};

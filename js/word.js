@@ -1,12 +1,12 @@
 // NEPA Plain Writer - Microsoft Word add-in (task pane).
 /* global Office, Word */
-import { initEngine, checkText, underlineSet, docStats, careChecklist, documentContext } from './engine.js';
+import { initEngine, checkText, underlineSet, docStats, careChecklist, craftChecklist, documentContext } from './engine.js';
 import { settings, addWords } from './store.js';
-import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderList, renderSettings } from './ui.js';
+import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, renderSettings } from './ui.js';
 
 const status = $('#status'), list = $('#list'), summary = $('#summary');
-const COLOR = {care: 'Berry', spelling: 'Red', grammar: 'Blue', cite: 'Blue', concise: 'Lavender', voice: 'Lavender', personal: 'Lavender', plain: 'Green', scicomm: 'Green', nepa: 'Berry'};
-const HILITE = {care: 'Yellow', spelling: 'Pink', grammar: 'Turquoise', cite: 'Turquoise', concise: 'Gray25', voice: 'Gray25', personal: 'Gray25', nepa: 'Gray25', plain: 'BrightGreen', scicomm: 'BrightGreen'};
+const COLOR = {care: 'Berry', spelling: 'Red', grammar: 'Blue', cite: 'Blue', concise: 'Lavender', voice: 'Lavender', craft: 'Lavender', personal: 'Lavender', plain: 'Green', scicomm: 'Green', nepa: 'Berry'};
+const HILITE = {care: 'Yellow', spelling: 'Pink', grammar: 'Turquoise', cite: 'Turquoise', concise: 'Gray25', voice: 'Gray25', craft: 'Gray25', personal: 'Gray25', nepa: 'Gray25', plain: 'BrightGreen', scicomm: 'BrightGreen'};
 let paras = [];            // [{index, text, issues}]
 let docAll = '';
 let canAnnotate = false, canPopup = false;
@@ -89,6 +89,7 @@ function redraw() {
   const iss = allIssues();
   const fullText = paras.map(p => p.text).join('\n');
   renderCare($('#care'), careChecklist(docAll || fullText), iss);
+  renderCraft($('#craft'), craftChecklist(docAll || fullText));
   renderSummary(summary, docStats(fullText, {docType: settings().docType, wordsPerPage: settings().wordsPerPage}), iss, () => check(false));
   renderList(list, iss, handlers);
   status.textContent = iss.length + ' suggestions' + (mode() === 'underline' && canAnnotate ? ' (underlined in the document)' : '');

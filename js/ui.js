@@ -52,7 +52,17 @@ export function renderCare(box, checklist, issues) {
     el('div', {class: 'legend', style: 'margin-top:6px'}, 'CARE Principles (GIDA 2019; Carroll et al. 2020). These are prompts for your judgment and for consultation with the community, not rulings.'));
 }
 
-const KIND_ORDER = ['care', 'spelling', 'grammar', 'concise', 'plain', 'scicomm', 'cite', 'voice', 'nepa', 'personal'];
+// Structure checklist from the BU Writing Guide in Archaeology, plus the writing-habit reminder.
+export function renderCraft(box, items) {
+  box.innerHTML = '';
+  box.append(el('div', {class: 'care-head'}, el('b', {}, 'Structure (archaeology writing guides)')));
+  for (const it of items) box.append(el('div', {class: 'craft-row' + (it.ok ? ' ok' : it.optional ? ' opt' : '')},
+    el('span', {class: 'craft-mark'}, it.ok ? '✓' : it.optional ? '–' : '!'), el('span', {}, it.label)));
+  box.append(el('div', {class: 'legend', style: 'margin-top:6px'},
+    'Paragraphs: 2 to 7 sentences, hamburger style (topic sentence, support, closing sentence). Write a little every day; habit makes the article (Alexandria Archive Institute, 30 Days to an Article).'));
+}
+
+const KIND_ORDER = ['care', 'spelling', 'grammar', 'concise', 'plain', 'scicomm', 'cite', 'voice', 'craft', 'nepa', 'personal'];
 export function renderSummary(box, stats, issues, onToggle) {
   const st = settings();
   const counts = {}; for (const i of issues) counts[i.kind] = (counts[i.kind] || 0) + 1;

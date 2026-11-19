@@ -1,4 +1,4 @@
-:root{--care:#b88700;--scicomm:#498205;--cite:#005b70;--voice:#4f6bed;--bg:#f6f7f9;--card:#fff;--ink:#1f2328;--muted:#5b616b;--line:#d9dde3;--accent:#0b5f5a;--accent2:#e6f2f1;
+:root{--craft:#8a5a2b;--care:#b88700;--scicomm:#498205;--cite:#005b70;--voice:#4f6bed;--bg:#f6f7f9;--card:#fff;--ink:#1f2328;--muted:#5b616b;--line:#d9dde3;--accent:#0b5f5a;--accent2:#e6f2f1;
 --spelling:#d13438;--grammar:#0f6cbd;--concise:#8764b8;--plain:#107c10;--nepa:#c239b3;--personal:#ca5010;}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
@@ -42,6 +42,11 @@ mark.k-voice{border-color:var(--voice);background:#e8ebfa}
 .care-state{font-size:13px;color:var(--muted)}
 .care-ask{font-size:13px;margin-top:2px}
 .stat.warn b{color:var(--spelling)}
+mark.k-craft{border-color:var(--craft);background:#f5ebe0}
+.issue.k-craft{border-left-color:var(--craft)}
+.craft-row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:14px}
+.craft-mark{flex:none;width:20px;height:20px;border-radius:50%;background:var(--craft);color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.craft-row.ok .craft-mark{background:#107c10}.craft-row.opt .craft-mark{background:#9aa0a6}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:13px;background:#fff;cursor:pointer;user-select:none}
 .chip .dot{width:10px;height:10px;border-radius:50%}
