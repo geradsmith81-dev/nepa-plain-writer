@@ -42,6 +42,10 @@ mark.k-voice{border-color:var(--voice);background:#e8ebfa}
 .care-state{font-size:13px;color:var(--muted)}
 .care-ask{font-size:13px;margin-top:2px}
 .stat.warn b{color:var(--spelling)}
+.guides{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 8px}
+.guide-toggle{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 12px 4px 8px;background:#fff;cursor:pointer;font-size:14px;user-select:none}
+.guide-toggle.on{border-color:var(--accent);background:var(--accent2);font-weight:600}
+.guide-toggle input{margin:0;accent-color:var(--accent)}
 mark.k-craft{border-color:var(--craft);background:#f5ebe0}
 .issue.k-craft{border-left-color:var(--craft)}
 .craft-row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:14px}

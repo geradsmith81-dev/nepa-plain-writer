@@ -16,8 +16,9 @@ export function settings() {
   return cache;
 }
 export function saveSettings(patch) {
+  const prevEnabled = Object.assign({}, settings().enabled);       // merge switches; never replace the whole set
   const s = Object.assign(settings(), patch);
-  if (patch.enabled) s.enabled = Object.assign({}, settings().enabled, patch.enabled);
+  if (patch.enabled) s.enabled = Object.assign(prevEnabled, patch.enabled);
   s.swaps = parseSwaps(s.swapsText);
   const {swaps, ...persist} = s;
   try { localStorage.setItem(KEY, JSON.stringify(persist)); } catch (e) {}

@@ -2,7 +2,7 @@
 /* global google */
 import { initEngine, checkText, underlineSet, docStats, careChecklist, craftChecklist, documentContext } from './engine.js';
 import { settings, addWords, setPersistHook, loadSettingsJSON } from './store.js';
-import { $, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, renderSettings } from './ui.js';
+import { $, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, fillGuides, renderSettings } from './ui.js';
 
 const status = $('#status'), list = $('#list'), summary = $('#summary');
 const gs = (fn, ...args) => new Promise((ok, fail) => google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](...args));
@@ -69,6 +69,7 @@ const handlers = {
   setPersistHook(json => gs('saveSettings', json).catch(() => {}));
   fillDocTypes($('#doctype'));
   fillAudience($('#audience'));
+  fillGuides($('#guides'));
   document.addEventListener('changed', () => paras.length && check(false));
   renderSettings($('#settingsBody'), () => {});
   $('#gear').onclick = () => $('#settings').classList.toggle('hidden');

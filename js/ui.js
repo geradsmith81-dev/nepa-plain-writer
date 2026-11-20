@@ -32,8 +32,42 @@ export function fillAudience(select) {
   select.onchange = () => { saveSettings({audience: select.value}); select.dispatchEvent(new CustomEvent('changed', {bubbles: true})); };
 }
 
-// The CARE panel sits at the top of every summary.
+// Style-guide switches: each guide can be included or left out. Settings are remembered on this device
+// (in Google Docs, in your Google account).
+export const STYLE_GUIDES = [
+  {key: 'care', label: 'CARE', kinds: ['care'], desc: 'Indigenous data governance flags and the CARE panel'},
+  {key: 'nepa', label: 'NEPA', kinds: ['nepa', 'concise'], desc: 'NEPA concision, NEPA style (acronyms, "significant", impact levels) and page limits'},
+  {key: 'saa', label: 'SAA citations', kinds: ['cite'], desc: 'SAA in-text citations, References Cited and radiocarbon dates'}
+];
+export function guideOn(key) { const g = STYLE_GUIDES.find(x => x.key === key); return settings().enabled[g.kinds[0]] !== false; }
+export function applyGuideVisibility() {
+  const dt = document.querySelector('#doctype'); if (dt) dt.classList.toggle('hidden', !guideOn('nepa'));
+  const care = document.querySelector('#care'); if (care) care.classList.toggle('hidden', !guideOn('care'));
+}
+export function fillGuides(box) {
+  if (!box) return;
+  box.innerHTML = '';
+  box.append(el('span', {class: 'legend'}, 'Style guides:'));
+  for (const g of STYLE_GUIDES) {
+    const cb = el('input', {type: 'checkbox', 'aria-label': 'Include ' + g.label});
+    cb.checked = guideOn(g.key);
+    const lab = el('label', {class: 'guide-toggle' + (cb.checked ? ' on' : ''), title: (cb.checked ? 'Included: ' : 'Left out: ') + g.desc}, cb, g.label);
+    cb.onchange = () => {
+      const patch = {}; for (const k of g.kinds) patch[k] = cb.checked;
+      saveSettings({enabled: patch});
+      lab.classList.toggle('on', cb.checked); lab.title = (cb.checked ? 'Included: ' : 'Left out: ') + g.desc;
+      applyGuideVisibility();
+      box.dispatchEvent(new CustomEvent('changed', {bubbles: true}));
+    };
+    box.append(lab);
+  }
+  applyGuideVisibility();
+}
+
+// The CARE panel sits at the top of every summary (hidden when the CARE guide is switched off).
 export function renderCare(box, checklist, issues) {
+  if (!guideOn('care')) { box.innerHTML = ''; box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
   const counts = {C: 0, A: 0, R: 0, E: 0};
   for (const i of issues) if (i.kind === 'care' && i.care) counts[i.care]++;
   const rows = Object.entries(CARE).map(([k, p]) => {
@@ -67,13 +101,16 @@ export function renderSummary(box, stats, issues, onToggle) {
   const st = settings();
   const counts = {}; for (const i of issues) counts[i.kind] = (counts[i.kind] || 0) + 1;
   const chips = el('div', {class: 'chips'});
+  const offKinds = new Set(STYLE_GUIDES.filter(g => !guideOn(g.key)).flatMap(g => g.kinds));
   for (const k of KIND_ORDER) {
     if (k === 'personal' && !st.swaps.length) continue;
+    if (offKinds.has(k)) continue;   // that style guide is switched off
     const on = st.enabled[k] !== false;
     chips.append(el('span', {class: 'chip' + (on ? '' : ' off'), title: on ? 'Click to hide' : 'Click to show',
       onclick: () => { saveSettings({enabled: {[k]: !on}}); onToggle && onToggle(); }},
       el('span', {class: 'dot', style: 'background:' + KIND_INFO[k].color}), KIND_INFO[k].label + ' ' + (counts[k] || 0)));
   }
+  if (!guideOn('nepa')) stats = Object.assign({}, stats, {pageLimit: 0, overLimit: false});   // no NEPA page limit when NEPA is off
   const pct = stats.pageLimit ? Math.min(100, 100 * stats.pages / stats.pageLimit) : 0;
   const pageStat = stats.pageLimit
     ? el('div', {class: 'stat'}, el('b', {}, stats.pages.toFixed(1) + ' / ' + stats.pageLimit), el('span', {}, 'est. pages vs NEPA limit (' + stats.wordsPerPage + ' words/page)'),

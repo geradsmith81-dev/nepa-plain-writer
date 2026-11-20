@@ -2,7 +2,7 @@
 /* global Office, Word */
 import { initEngine, checkText, underlineSet, docStats, careChecklist, craftChecklist, documentContext } from './engine.js';
 import { settings, addWords } from './store.js';
-import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, renderSettings } from './ui.js';
+import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, fillGuides, renderSettings } from './ui.js';
 
 const status = $('#status'), list = $('#list'), summary = $('#summary');
 const COLOR = {care: 'Berry', spelling: 'Red', grammar: 'Blue', cite: 'Blue', concise: 'Lavender', voice: 'Lavender', craft: 'Lavender', personal: 'Lavender', plain: 'Green', scicomm: 'Green', nepa: 'Berry'};
@@ -283,6 +283,7 @@ Office.onReady(async info => {
   }
   fillDocTypes($('#doctype'));
   fillAudience($('#audience'));
+  fillGuides($('#guides'));
   $('#care').innerHTML = '<span class="legend">The CARE checklist appears here after you press Check document.</span>';
   $('#craft').innerHTML = '';
   $('#craft').classList.add('hidden');

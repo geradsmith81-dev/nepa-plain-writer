@@ -1,7 +1,7 @@
 // NEPA Plain Writer - phone and desktop page (paste or type text from any program).
 import { initEngine, checkText, underlineSet, applyFix, docStats, careChecklist, craftChecklist } from './engine.js';
 import { settings } from './store.js';
-import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, renderSettings } from './ui.js';
+import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, fillGuides, renderSettings } from './ui.js';
 
 const input = $('#input'), review = $('#review'), list = $('#list'), summary = $('#summary'), status = $('#status');
 let issues = [], ignored = new Set(), timer = null, running = false, again = false;
@@ -76,6 +76,7 @@ $('#clear').onclick = () => { if (confirm('Clear the text box?')) { input.value 
 $('#gear').onclick = () => $('#settings').classList.toggle('hidden');
 fillDocTypes($('#doctype'));
 fillAudience($('#audience'));
+fillGuides($('#guides'));
 document.addEventListener('changed', run);
 renderSettings($('#settingsBody'), run);
 
