@@ -83,3 +83,9 @@ mark.k-craft{border-color:var(--craft);background:#f5ebe0}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1f2328;color:#fff;padding:8px 14px;border-radius:8px;font-size:14px;z-index:20}
 body.pane .wrap{padding:8px}
 body.pane header.bar h1{font-size:15px}
+
+.issue .suggest{margin:4px 0;padding:6px 8px;border-radius:6px;background:var(--accent2);word-break:break-word}
+.issue .acts button.fix-main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;min-width:64px}
+.issue .acts button.alt{background:#fff;border-color:#b7d8d5;font-size:13px;max-width:100%;white-space:normal;text-align:left}
+.issue .editor{margin-top:8px;padding:8px;border:1px dashed var(--accent);border-radius:8px;background:#fbfdfd}
+.issue .editor textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:6px;padding:6px;font:inherit;margin:6px 0}

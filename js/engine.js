@@ -3,7 +3,7 @@
 // Concision and plain language: rules.js.
 import { LocalLinter, Dialect } from '../harper/index.js';
 import { binary } from '../harper/binary.js';
-import { checkRules, docStats, KIND_INFO } from './rules.js';
+import { checkRules, docStats, KIND_INFO, splitSentences } from './rules.js';
 import { checkCare, careChecklist } from './care.js';
 import { checkVoice } from './voice.js';
 import { checkSciComm } from './scicomm.js';
@@ -115,7 +115,20 @@ export async function checkText(text, extra = {}) {
   if (st.enabled.voice !== false) issues.push(...checkVoice(text, ctx));
   if (st.enabled.scicomm !== false && !ctx.isRef) issues.push(...checkSciComm(text, ctx));
   if (st.enabled.craft !== false) issues.push(...checkGuides(text, ctx));
-  return dedupe(issues);
+  const out = dedupe(issues);
+  addEditRanges(text, out);
+  return out;
+}
+
+// What the Fix edit box shows: the whole sentence for passive voice and "lead with the finding" flags, otherwise the flagged text.
+const SENTENCE_RULES = /^(?:passive|there-is|craft:process|craft:actor|care:silence|nepa:quantify|quantify)$/;
+function addEditRanges(text, list) {
+  const sents = splitSentences(text);
+  for (const i of list) {
+    let s = i.start, e = i.end;
+    if (SENTENCE_RULES.test(i.rule)) { const sn = sents.find(x => x.start <= i.start && x.end >= i.end); if (sn) { s = sn.start; e = sn.end; } }
+    i.editStart = s; i.editEnd = e; i.editText = text.slice(s, e);
+  }
 }
 
 // Drop word-level issues that sit entirely inside a higher-priority or longer word-level issue (e.g. "assistance" inside "provide assistance").

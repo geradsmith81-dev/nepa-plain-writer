@@ -1,3 +1,4 @@
+import { findPassives } from './passive.js';
 // NEPA Plain Writer - concision and plain-language rules.
 // Pure JavaScript, no page or Word dependencies, so the same rules run in Word, on the phone and on the desktop.
 // Every issue: {start, end, kind, rule, message, source, fixes:[{label, start, end, text}], scope:'word'|'sentence'}
@@ -292,11 +293,13 @@ export function checkRules(text, opts = {}) {
       add(m.index, m.index + m[0].length, 'concise', 'filler:' + f, '"' + m[0] + '" rarely adds meaning. Delete it or give a measurement.', SOURCES.STATUTE_CONCISE, ['']);
   }
   if (en.passive) {
-    const re = new RegExp('\\b(am|is|are|was|were|be|been|being)\\s+(?:(?:not|also|often|then|now|generally|typically|usually|still|already|further|previously|currently|newly|largely|primarily|partially|fully|well)\\s+)?([a-z]+ed|' + IRREGULAR + ')\\b(?:\\s+by\\b)?', 'gi');
-    for (const m of text.matchAll(re)) {
-      const part = m[2].toLowerCase();
-      if (NOT_PARTICIPLE.has(part)) continue;
-      add(m.index, m.index + m[0].length, 'plain', 'passive', 'Passive voice. Say who does the action, e.g. "The BLM would build the road", not "The road would be built". Keep it when the actor is unknown or unimportant.', SOURCES.CEQ_PLAIN + '; ' + SOURCES.FPLG, []);
+    for (const ps of findPassives(text)) {
+      const clause = text.slice(ps.start, ps.end);
+      const msg = ps.fixes.length
+        ? 'Passive voice. Active version: "' + ps.fixes[0].text + '". Check that it keeps your meaning; "[who]" means name the actor yourself. Keep the passive only when the actor is unknown or unimportant.'
+        : 'Passive voice. Say who does the action, e.g. "The BLM would build the road", not "The road would be built". This sentence is too complex to rewrite automatically; use Fix to edit it. Keep the passive when the actor is unknown or unimportant.';
+      issues.push({start: ps.coreStart, end: ps.coreEnd, kind: 'plain', rule: 'passive', scope: 'word', problem: clause, message: msg,
+                   source: SOURCES.CEQ_PLAIN + '; ' + SOURCES.FPLG + '; BU Writing Guide in Archaeology', fixes: ps.fixes});
     }
   }
   if (en.nepa) {

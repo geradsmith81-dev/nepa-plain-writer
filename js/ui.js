@@ -92,19 +92,42 @@ export function renderSummary(box, stats, issues, onToggle) {
 }
 
 // One issue card. handlers: {onFix(issue, fix), onGo(issue), onIgnore(issue), onAddWord(issue)}
+// Every card has a Fix button: it applies the suggested fix, or opens an edit box when there is no automatic fix.
 export function issueCard(issue, h) {
   const info = KIND_INFO[issue.kind];
-  const acts = el('div', {class: 'acts'});
-  for (const f of issue.fixes.slice(0, 3)) acts.append(el('button', {class: 'fix', title: 'Replace with this', onclick: e => { e.stopPropagation(); h.onFix(issue, f); }}, f.label === '' ? '(delete)' : f.label));
-  if (h.onGo) acts.append(el('button', {onclick: e => { e.stopPropagation(); h.onGo(issue); }}, 'Show'));
-  if (issue.kind === 'spelling' && h.onAddWord) acts.append(el('button', {onclick: e => { e.stopPropagation(); h.onAddWord(issue); }}, 'Add to my words'));
-  acts.append(el('button', {onclick: e => { e.stopPropagation(); h.onIgnore(issue); }}, 'Ignore'));
+  const f0 = issue.fixes[0];
+  const stop = fn => e => { e.stopPropagation(); fn(e); };
+  // Edit box: the whole sentence for passive voice and similar flags, otherwise the flagged words.
+  const ta = el('textarea', {class: 'edit-text', rows: 3, 'aria-label': 'Edit the text'});
+  const editor = el('div', {class: 'editor hidden', onclick: e => e.stopPropagation()},
+    el('div', {class: 'legend'}, 'Edit the text, then press Apply. The change goes straight into your document.'),
+    ta,
+    el('div', {class: 'row'},
+      el('button', {class: 'primary', onclick: stop(() => {
+        if (ta.value === issue.editText) { toast('No change made'); return; }
+        h.onFix(issue, {label: 'Edit', start: issue.editStart, end: issue.editEnd, text: ta.value});
+      })}, 'Apply'),
+      el('button', {onclick: stop(() => editor.classList.add('hidden'))}, 'Cancel')));
+  const openEditor = () => { ta.value = issue.editText ?? issue.problem; editor.classList.remove('hidden'); ta.focus(); };
+  const shown = f => f.text === '' ? f.label : (f.label.startsWith('Rewrite: ') ? f.text : f.label);
+  const suggestion = f0 ? el('div', {class: 'suggest'},
+      el('span', {class: 'legend'}, issue.fixes.length > 1 ? 'Suggested fix (1 of ' + Math.min(3, issue.fixes.length) + '): ' : 'Suggested fix: '),
+      el('b', {}, shown(f0))) : null;
+  const others = issue.fixes.slice(1, 3).map(f => el('button', {class: 'alt', title: 'Use this fix instead', onclick: stop(() => h.onFix(issue, f))}, 'Or: ' + shown(f)));
+  const acts = el('div', {class: 'acts'},
+    el('button', {class: 'fix fix-main', title: f0 ? 'Apply the suggested fix' : 'Open an edit box to fix this yourself', onclick: stop(() => f0 ? h.onFix(issue, f0) : openEditor())}, 'Fix'),
+    ...others,
+    f0 ? el('button', {title: 'Write your own fix', onclick: stop(openEditor)}, 'Edit') : null,
+    h.onGo ? el('button', {onclick: stop(() => h.onGo(issue))}, 'Show') : null,
+    issue.kind === 'spelling' && h.onAddWord ? el('button', {onclick: stop(() => h.onAddWord(issue))}, 'Add to my words') : null,
+    el('button', {onclick: stop(() => h.onIgnore(issue))}, 'Ignore'));
   return el('div', {class: 'issue k-' + issue.kind, 'data-id': issue.id, onclick: () => h.onGo && h.onGo(issue)},
     el('div', {class: 'kind'}, info.label),
-    el('div', {class: 'prob' + (issue.scope === 'sentence' ? ' longtext' : '')}, issue.problem),
+    el('div', {class: 'prob' + (issue.scope !== 'word' ? ' longtext' : '')}, issue.problem),
     el('div', {class: 'msg'}, issue.message),
+    suggestion,
     el('div', {class: 'src'}, 'Basis: ' + issue.source),
-    acts);
+    acts, editor);
 }
 
 export function renderList(box, issues, h) {
