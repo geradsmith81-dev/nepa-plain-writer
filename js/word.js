@@ -71,9 +71,11 @@ async function check(selectionOnly) {
       }
     });
     ignored = new Set();
-    await drawMarks();
+    let note = '';
+    try { note = await drawMarksSafely(); } catch (e) { note = 'Marks could not be drawn in this document (' + errText(e) + '); showing the list only.'; }
     redraw();
-  } catch (e) { status.textContent = 'Problem: ' + e.message; console.error(e); }
+    if (note) status.textContent += ' · ' + note;
+  } catch (e) { status.textContent = 'Problem: ' + errText(e); console.error(e); }
   $('#checkDoc').disabled = $('#checkSel').disabled = false;
   busy = false; quietUntil = Date.now() + 1500;
 }
@@ -89,10 +91,31 @@ function redraw() {
   const iss = allIssues();
   const fullText = paras.map(p => p.text).join('\n');
   renderCare($('#care'), careChecklist(docAll || fullText), iss);
+  $('#craft').classList.remove('hidden');
   renderCraft($('#craft'), craftChecklist(docAll || fullText));
   renderSummary(summary, docStats(fullText, {docType: settings().docType, wordsPerPage: settings().wordsPerPage}), iss, () => check(false));
   renderList(list, iss, handlers);
   status.textContent = iss.length + ' suggestions' + (mode() === 'underline' && canAnnotate ? ' (underlined in the document)' : '');
+}
+
+const errText = e => (e && (e.code || e.message || String(e))) + '';
+const notImpl = e => /0x80004001|NotImplemented|not implemented|ApiNotFound|InvalidArgument|GeneralException|0x80070057/i.test(errText(e) + ' ' + (e && e.message || ''));
+// Try the best marking this Word supports, falling back step by step:
+// underlines with pop-up suggestions -> underlines -> highlights -> list only. Returns a note for the status line.
+async function drawMarksSafely() {
+  const want = mode();
+  if (want === 'list') return '';
+  if (want === 'underline' && canAnnotate) {
+    try { await drawMarks(); return ''; } catch (e) {
+      console.warn('annotations with pop-ups failed', e);
+      annMap.clear();
+      if (canPopup) { canPopup = false; try { await drawMarks(); return ''; } catch (e2) { console.warn('annotations failed', e2); annMap.clear(); } }
+      canAnnotate = false;
+      const opt = $('#mode').querySelector('option[value=underline]'); if (opt) opt.textContent = 'Underlines (not available in this Word; using highlights)';
+    }
+  }
+  try { await drawMarks(); return canAnnotate || want !== 'underline' ? '' : 'Word refused coloured underlines here, so issues are highlighted instead (use Remove marks to clear them).'; }
+  catch (e) { console.warn('highlights failed', e); highlighted.length = 0; return 'Marks could not be drawn in this document (' + errText(e) + '); showing the list only.'; }
 }
 
 async function drawMarks() {
@@ -194,9 +217,11 @@ async function recheckParagraph(index) {
     if (mode() === 'underline' && canAnnotate) {
       const marks = underlineSet(p.issues.filter(i => !ignored.has(key(index, i))));
       if (marks.length) {
-        const ids = para.insertAnnotations({critiques: marks.map(i => Object.assign({colorScheme: COLOR[i.kind], start: i.start, length: i.end - i.start},
-          canPopup ? {popupOptions: {suggestions: i.fixes.slice(0, 3).map(f => f.label)}} : {}))});
-        await ctx.sync(); ids.value.forEach((id, n) => annMap.set(id, {para: index, issue: marks[n]}));
+        try {
+          const ids = para.insertAnnotations({critiques: marks.map(i => Object.assign({colorScheme: COLOR[i.kind], start: i.start, length: i.end - i.start},
+            canPopup ? {popupOptions: {suggestions: i.fixes.slice(0, 3).map(f => f.label)}} : {}))});
+          await ctx.sync(); ids.value.forEach((id, n) => annMap.set(id, {para: index, issue: marks[n]}));
+        } catch (e) { console.warn('re-marking failed', e); canAnnotate = false; }
       }
     }
   });
@@ -258,6 +283,9 @@ Office.onReady(async info => {
   }
   fillDocTypes($('#doctype'));
   fillAudience($('#audience'));
+  $('#care').innerHTML = '<span class="legend">The CARE checklist appears here after you press Check document.</span>';
+  $('#craft').innerHTML = '';
+  $('#craft').classList.add('hidden');
   document.addEventListener('changed', () => paras.length && check(false));
   renderSettings($('#settingsBody'), () => {});
   $('#gear').onclick = () => $('#settings').classList.toggle('hidden');

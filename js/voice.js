@@ -15,6 +15,31 @@ const SLIPS = [
   [/\b(?:more|less|fewer|greater)\s+[a-z]+\s+then\b/gi, null, 'After a comparison, use "than", not "then".'],
   [/\b(?:RCYBP|rcybp|RCYBP\.)\b/g, null, 'Make sure uncalibrated ages are labelled ("14C yr BP" or "rcybp") and are not mixed with cal BP in one sentence without labels.'],
 ];
+
+// Oxford (serial) comma: "A, B, and C". The user's default; also SAA Style Guide (Dec 2023) §3.3.13.
+const INTRO = /^(?:in|at|on|by|for|from|during|after|before|since|until|when|while|where|if|although|though|because|as|however|thus|therefore|here|there|today|then|now|meanwhile|moreover|furthermore|finally|first|second|third|next|also|instead|still|yet|indeed|nevertheless|nonetheless|similarly|likewise|consequently|accordingly|overall|historically|traditionally|together|unlike|like|despite|with|without|according|following|between|among|across|within|throughout|under|over|above|below|near|beyond|to|of|once|whereas|unless|whether|after all)\b/i;
+const ITEM = "[A-Za-z0-9À-ÿ'’][\\wÀ-ÿ'’\\-]*(?:\\s+[\\wÀ-ÿ'’\\-]+){0,3}";
+const SERIES = new RegExp("(?<![\\wÀ-ÿ'’\\-])((?:" + ITEM + ",\\s+)+)(" + ITEM + ")\\s+(and|or|nor)\\s+(?=[\\wÀ-ÿ'’\\-])", 'g');
+export function checkOxford(text) {
+  const out = [];
+  let depth = 0; const inParen = new Array(text.length).fill(false);
+  for (let i = 0; i < text.length; i++) { if (text[i] === '(') depth++; inParen[i] = depth > 0; if (text[i] === ')' && depth > 0) depth--; }
+  for (const m of text.matchAll(SERIES)) {
+    const items = m[1].split(/,\s+/).filter(Boolean);
+    const first = items[0].trim();
+    // One comma only ("A, B and C"): guard against introductory phrases such as "In 2001, Smith and Jones ...".
+    if (items.length === 1 && (INTRO.test(first) || /^\w+ly$/i.test(first) || /^\d[\d,.]*$/.test(first) || first.split(/\s+/).length > 3)) continue;
+    if (inParen[m.index] && /\b(?:1[6-9]|20)\d\d\b/.test(m[0])) continue;   // inside a citation
+    const bStart = m.index + m[1].length, end = m.index + m[0].length - 1;
+    const conjEnd = bStart + m[2].length + m[0].slice(m[1].length + m[2].length).match(/^\s+(?:and|or|nor)/)[0].length;
+    out.push({start: bStart, end: conjEnd, kind: 'voice', rule: 'voice:oxford', scope: 'word', problem: text.slice(bStart, conjEnd),
+      message: 'Use the Oxford (serial) comma before the last item in a list: "A, B, and C". Ignore this if it is not a list.',
+      source: 'Your default (Oxford comma); SAA Style Guide (Dec 2023) §3.3.13',
+      fixes: [{label: m[2] + ', ' + m[3], start: bStart, end: conjEnd, text: m[2] + ', ' + m[3]}]});
+  }
+  return out;
+}
+
 const PLACEHOLDERS = /\(citation\)|\[\[NEEDED[^\]]*\]\]|\bTBD\b|\bTK\b|\bXXX?\b|\?\?\?|\bfill (?:in|this)\b|\b(?:to write|insert here|add here)\b|…|\.\.\./g;
 
 export function checkVoice(text, opts = {}) {
@@ -37,6 +62,7 @@ export function checkVoice(text, opts = {}) {
     for (const m of text.matchAll(new RegExp('\\b' + drop + '(s?)\\b', 'g'))) add(m.index, m.index + m[0].length, 'athabascan', 'This document uses both "Athabascan" and "Athabaskan". Pick one; "' + keep + '" is used more here.', [keep + m[1]]);
   }
   if (opts.isRef) return out;   // reference titles are reproduced exactly
+  out.push(...checkOxford(text));
   // Species: scientific name at first mention.
   const seen = opts.seenSpecies || new Set();
   for (const [common, bin] of Object.entries(SPECIES)) {
