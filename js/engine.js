@@ -9,6 +9,7 @@ import { checkVoice } from './voice.js';
 import { checkSciComm } from './scicomm.js';
 import { checkGuides, craftChecklist } from './guides.js';
 import { checkAja, buildAjaIndex, isAjaRef, ajaChecklist, AJA_TYPES } from './aja.js';
+import { checkStyle, buildStyleIndex, isStyleRef, CITE_STYLES } from './cites.js';
 import { checkSaa, buildCiteIndex, isReferenceEntry } from './saa.js';
 import { settings, personalWordSet, allPersonalWords, setSharedWords } from './store.js';
 
@@ -111,11 +112,14 @@ export async function checkText(text, extra = {}) {
   const ctx = {audience: st.audience, docText, seenSpecies: extra.seenSpecies, seenSentences: extra.seenSentences, seenJargon: extra.seenJargon,
                citeIndex: extra.citeIndex || buildCiteIndex(docText)};
   ctx.ajaIndex = extra.ajaIndex || buildAjaIndex(docText);
-  ctx.isRef = isReferenceEntry(text, ctx.citeIndex) || isAjaRef(text, ctx.ajaIndex);
+  ctx.styleIndex = extra.styleIndex || buildStyleIndex(docText);
+  ctx.isRef = isReferenceEntry(text, ctx.citeIndex) || isAjaRef(text, ctx.ajaIndex) || isStyleRef(text, ctx.styleIndex);
   if (st.enabled.care !== false && !ctx.isRef) issues.push(...checkCare(text, ctx));
   // SAA and AJA citation rules differ, so only one runs (the switches keep them exclusive; AJA wins if both are set).
-  if (st.enabled.aja === true) issues.push(...checkAja(text, ctx));
-  else if (st.enabled.cite !== false) issues.push(...checkSaa(text, ctx));
+  const style = st.citeStyle || 'saa';
+  if (style === 'aja') issues.push(...checkAja(text, ctx));
+  else if (style === 'saa') issues.push(...checkSaa(text, ctx));
+  else if (style === 'chicago' || style === 'apa' || style === 'mla') issues.push(...checkStyle(text, ctx, style));
   if (st.enabled.voice !== false) issues.push(...checkVoice(text, ctx));
   if (st.enabled.scicomm !== false && !ctx.isRef) issues.push(...checkSciComm(text, ctx));
   if (st.enabled.craft !== false) issues.push(...checkGuides(text, ctx));
@@ -161,8 +165,8 @@ export function underlineSet(issues) {
 }
 
 export function applyFix(text, fix) { return text.slice(0, fix.start) + fix.text + text.slice(fix.end); }
-export { docStats, KIND_INFO, careChecklist, buildCiteIndex, craftChecklist, ajaChecklist, AJA_TYPES };
+export { docStats, KIND_INFO, careChecklist, buildCiteIndex, craftChecklist, ajaChecklist, AJA_TYPES, CITE_STYLES };
 // A fresh shared context for checking one document paragraph by paragraph.
 export function documentContext(docText) {
-  return {docText, knownAcronyms: new Set(), seenSpecies: new Set(), seenSentences: new Map(), seenJargon: new Set(), citeIndex: buildCiteIndex(docText), ajaIndex: buildAjaIndex(docText)};
+  return {docText, knownAcronyms: new Set(), seenSpecies: new Set(), seenSentences: new Map(), seenJargon: new Set(), citeIndex: buildCiteIndex(docText), ajaIndex: buildAjaIndex(docText), styleIndex: buildStyleIndex(docText)};
 }

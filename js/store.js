@@ -2,7 +2,7 @@
 import { parseWordList, parseSwaps } from './rules.js';
 const KEY = 'nepa-plain-writer-v1';
 const DEFAULTS = {
-  words: [], swapsText: '', docType: 'ea', audience: 'technical', ajaType: 'article', wordsPerPage: 500, longLimit: 25,
+  words: [], swapsText: '', docType: 'ea', audience: 'technical', ajaType: 'article', citeStyle: 'saa', wordsPerPage: 500, longLimit: 25,
   enabled: {care: true, spelling: true, grammar: true, concise: true, plain: true, scicomm: true, cite: true, aja: false, voice: true, craft: true, nepa: true, personal: true, passive: true, filler: true, long: true}
 };
 let cache = null;
@@ -12,6 +12,8 @@ export function settings() {
   try { s = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
   cache = Object.assign({}, DEFAULTS, s);
   cache.enabled = Object.assign({}, DEFAULTS.enabled, s.enabled || {});
+  // older settings had separate SAA and AJA switches
+  if (!s.citeStyle) cache.citeStyle = (s.enabled && s.enabled.aja === true) ? 'aja' : (s.enabled && s.enabled.cite === false) ? 'none' : 'saa';
   cache.swaps = parseSwaps(cache.swapsText);
   return cache;
 }
@@ -19,6 +21,7 @@ export function saveSettings(patch) {
   const prevEnabled = Object.assign({}, settings().enabled);       // merge switches; never replace the whole set
   const s = Object.assign(settings(), patch);
   if (patch.enabled) s.enabled = Object.assign(prevEnabled, patch.enabled);
+  if (patch.citeStyle) s.enabled = Object.assign({}, s.enabled, {cite: patch.citeStyle !== 'none' && patch.citeStyle !== 'aja', aja: patch.citeStyle === 'aja'});
   s.swaps = parseSwaps(s.swapsText);
   const {swaps, ...persist} = s;
   try { localStorage.setItem(KEY, JSON.stringify(persist)); } catch (e) {}
@@ -33,6 +36,7 @@ export function loadSettingsJSON(json) {
   let o = {}; try { o = JSON.parse(json || '{}'); } catch (e) {}
   cache = Object.assign({}, DEFAULTS, o);
   cache.enabled = Object.assign({}, DEFAULTS.enabled, o.enabled || {});
+  if (!o.citeStyle) cache.citeStyle = (o.enabled && o.enabled.aja === true) ? 'aja' : (o.enabled && o.enabled.cite === false) ? 'none' : 'saa';
   cache.swaps = parseSwaps(cache.swapsText);
   try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {}
 }
@@ -51,13 +55,13 @@ export function personalWordSet() {
   const s = new Set(); for (const w of [...settings().words, ...sharedWords]) s.add(w.toLowerCase()); return s;
 }
 export function exportBackup() {
-  const {words, swapsText, docType, audience, ajaType, wordsPerPage, longLimit, enabled} = settings();
-  return JSON.stringify({app: 'NEPA Plain Writer', version: 3, words, swapsText, docType, audience, ajaType, wordsPerPage, longLimit, enabled}, null, 1);
+  const {words, swapsText, docType, audience, ajaType, citeStyle, wordsPerPage, longLimit, enabled} = settings();
+  return JSON.stringify({app: 'NEPA Plain Writer', version: 4, words, swapsText, docType, audience, ajaType, citeStyle, wordsPerPage, longLimit, enabled}, null, 1);
 }
 export function importBackup(json) {
   const o = JSON.parse(json);
   if (o.words) addWords(o.words);
   const patch = {};
-  for (const k of ['swapsText', 'docType', 'audience', 'ajaType', 'wordsPerPage', 'longLimit', 'enabled']) if (o[k] !== undefined) patch[k] = o[k];
+  for (const k of ['swapsText', 'docType', 'audience', 'ajaType', 'citeStyle', 'wordsPerPage', 'longLimit', 'enabled']) if (o[k] !== undefined) patch[k] = o[k];
   saveSettings(patch);
 }

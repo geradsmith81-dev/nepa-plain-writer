@@ -36,11 +36,17 @@ export function fillAudience(select) {
 // (in Google Docs, in your Google account).
 export const STYLE_GUIDES = [
   {key: 'care', label: 'CARE', kinds: ['care'], desc: 'Indigenous data governance flags and the CARE panel'},
-  {key: 'nepa', label: 'NEPA', kinds: ['nepa', 'concise'], desc: 'NEPA concision, NEPA style (acronyms, "significant", impact levels) and page limits'},
-  {key: 'saa', label: 'SAA citations', kinds: ['cite'], desc: 'SAA in-text citations, References Cited and radiocarbon dates', excludes: 'aja'},
-  {key: 'aja', label: 'AJA', kinds: ['aja'], desc: 'Alaska Journal of Anthropology Style Guide (2018): citations, references, numbers, measurements, dates, place names', excludes: 'saa'}
+  {key: 'nepa', label: 'NEPA', kinds: ['nepa', 'concise'], desc: 'NEPA concision, NEPA style (acronyms, "significant", impact levels) and page limits'}
 ];
-export function guideOn(key) { const g = STYLE_GUIDES.find(x => x.key === key); const v = settings().enabled[g.kinds[0]]; return key === 'aja' ? v === true : v !== false; }
+// Citation styles contradict each other, so they are one menu: only one runs at a time.
+export const CITATION_MENU = [
+  ['saa', 'SAA (2023)'], ['aja', 'AJA (2018)'], ['chicago', 'Chicago 18th (author-date)'], ['apa', 'APA 7th'], ['mla', 'MLA 9th'], ['none', 'None']
+];
+export const citeStyle = () => settings().citeStyle || 'saa';
+export function guideOn(key) {
+  if (key === 'aja' || key === 'saa') return citeStyle() === key;
+  const g = STYLE_GUIDES.find(x => x.key === key); return settings().enabled[g.kinds[0]] !== false;
+}
 export function applyGuideVisibility() {
   const dt = document.querySelector('#doctype'); if (dt) dt.classList.toggle('hidden', !guideOn('nepa'));
   const care = document.querySelector('#care'); if (care) care.classList.toggle('hidden', !guideOn('care'));
@@ -56,15 +62,6 @@ export function fillGuides(box) {
     const lab = el('label', {class: 'guide-toggle' + (cb.checked ? ' on' : ''), 'data-guide': g.key, title: (cb.checked ? 'Included: ' : 'Left out: ') + g.desc}, cb, g.label);
     cb.onchange = () => {
       const patch = {}; for (const k of g.kinds) patch[k] = cb.checked;
-      if (cb.checked && g.excludes) {           // SAA and AJA citation rules conflict: switching one on switches the other off
-        const other = STYLE_GUIDES.find(x => x.key === g.excludes);
-        if (guideOn(other.key)) {
-          for (const k of other.kinds) patch[k] = false;
-          const ol = [...box.querySelectorAll('label')].find(l => l.dataset.guide === other.key);
-          if (ol) { ol.querySelector('input').checked = false; ol.classList.remove('on'); }
-          toast(other.label + ' switched off: SAA and AJA citation rules differ, so one is used at a time.');
-        }
-      }
       saveSettings({enabled: patch});
       lab.classList.toggle('on', cb.checked); lab.title = (cb.checked ? 'Included: ' : 'Left out: ') + g.desc;
       applyGuideVisibility();
@@ -72,6 +69,11 @@ export function fillGuides(box) {
     };
     box.append(lab);
   }
+  const sel = el('select', {class: 'cite-style', 'aria-label': 'Citation style', title: 'Citation styles disagree with each other, so one is checked at a time'});
+  for (const [k, label] of CITATION_MENU) sel.append(el('option', {value: k}, 'Citations: ' + label));
+  sel.value = citeStyle();
+  sel.onchange = () => { saveSettings({citeStyle: sel.value}); applyGuideVisibility(); box.dispatchEvent(new CustomEvent('changed', {bubbles: true})); };
+  box.append(sel);
   applyGuideVisibility();
 }
 
@@ -128,13 +130,15 @@ export function renderSummary(box, stats, issues, onToggle) {
   const counts = {}; for (const i of issues) counts[i.kind] = (counts[i.kind] || 0) + 1;
   const chips = el('div', {class: 'chips'});
   const offKinds = new Set(STYLE_GUIDES.filter(g => !guideOn(g.key)).flatMap(g => g.kinds));
+  if (citeStyle() !== 'aja') offKinds.add('aja');
+  if (citeStyle() === 'none' || citeStyle() === 'aja') offKinds.add('cite');
   for (const k of KIND_ORDER) {
     if (k === 'personal' && !st.swaps.length) continue;
     if (offKinds.has(k)) continue;   // that style guide is switched off
     const on = st.enabled[k] !== false;
     chips.append(el('span', {class: 'chip' + (on ? '' : ' off'), title: on ? 'Click to hide' : 'Click to show',
       onclick: () => { saveSettings({enabled: {[k]: !on}}); onToggle && onToggle(); }},
-      el('span', {class: 'dot', style: 'background:' + KIND_INFO[k].color}), KIND_INFO[k].label + ' ' + (counts[k] || 0)));
+      el('span', {class: 'dot', style: 'background:' + KIND_INFO[k].color}), (k === 'cite' ? 'Citations (' + (CITATION_MENU.find(c => c[0] === citeStyle()) || [0, 'SAA'])[1] + ')' : KIND_INFO[k].label) + ' ' + (counts[k] || 0)));
   }
   if (!guideOn('nepa')) stats = Object.assign({}, stats, {pageLimit: 0, overLimit: false});   // no NEPA page limit when NEPA is off
   const pct = stats.pageLimit ? Math.min(100, 100 * stats.pages / stats.pageLimit) : 0;
@@ -185,7 +189,7 @@ export function issueCard(issue, h) {
     issue.kind === 'spelling' && h.onAddWord ? el('button', {onclick: stop(() => h.onAddWord(issue))}, 'Add to my words') : null,
     el('button', {onclick: stop(() => h.onIgnore(issue))}, 'Ignore'));
   return el('div', {class: 'issue k-' + issue.kind, 'data-id': issue.id, onclick: () => h.onGo && h.onGo(issue)},
-    el('div', {class: 'kind'}, info.label),
+    el('div', {class: 'kind'}, issue.kind === 'cite' ? 'Citations (' + (CITATION_MENU.find(c => c[0] === citeStyle()) || [0, 'SAA'])[1] + ')' : info.label),
     el('div', {class: 'prob' + (issue.scope !== 'word' ? ' longtext' : '')}, issue.problem),
     el('div', {class: 'msg'}, issue.message),
     suggestion,
