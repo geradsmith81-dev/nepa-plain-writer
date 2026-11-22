@@ -21,6 +21,7 @@ export const KIND_INFO = {
   scicomm:  {label: 'Science communication', color: '#498205', word: 'Green'},
   cite:     {label: 'Citations & dates (SAA)', color: '#005b70', word: 'Blue'},
   voice:    {label: 'My style', color: '#4f6bed', word: 'Lavender'},
+  aja:      {label: 'AJA style', color: '#455a64', word: 'Blue'},
   craft:    {label: 'Archaeology writing craft', color: '#8a5a2b', word: 'Lavender'},
   nepa:     {label: 'NEPA style', color: '#c239b3', word: 'Berry'},
   personal: {label: 'My word swaps', color: '#ca5010', word: 'Lavender'}

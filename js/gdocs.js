@@ -1,8 +1,8 @@
 // NEPA Plain Writer - Google Docs side panel. Loaded by the small Apps Script inside your document.
 /* global google */
-import { initEngine, checkText, underlineSet, docStats, careChecklist, craftChecklist, documentContext } from './engine.js';
+import { initEngine, checkText, underlineSet, docStats, careChecklist, craftChecklist, ajaChecklist, AJA_TYPES, documentContext } from './engine.js';
 import { settings, addWords, setPersistHook, loadSettingsJSON } from './store.js';
-import { $, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, fillGuides, renderSettings } from './ui.js';
+import { $, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderAja, renderList, fillGuides, renderSettings } from './ui.js';
 
 const status = $('#status'), list = $('#list'), summary = $('#summary');
 const gs = (fn, ...args) => new Promise((ok, fail) => google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](...args));
@@ -36,6 +36,7 @@ function redraw() {
   const iss = allIssues();
   renderCare($('#care'), careChecklist(docAll), iss);
   renderCraft($('#craft'), craftChecklist(docAll));
+  renderAja($('#aja'), ajaChecklist(docAll, settings().ajaType), AJA_TYPES, () => check(false));
   renderSummary(summary, docStats(paras.map(p => p.text).join('\n'), {docType: settings().docType, wordsPerPage: settings().wordsPerPage}), iss, () => check(false));
   renderList(list, iss, handlers);
   status.textContent = iss.length + ' suggestions';

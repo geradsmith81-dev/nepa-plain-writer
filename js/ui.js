@@ -37,12 +37,14 @@ export function fillAudience(select) {
 export const STYLE_GUIDES = [
   {key: 'care', label: 'CARE', kinds: ['care'], desc: 'Indigenous data governance flags and the CARE panel'},
   {key: 'nepa', label: 'NEPA', kinds: ['nepa', 'concise'], desc: 'NEPA concision, NEPA style (acronyms, "significant", impact levels) and page limits'},
-  {key: 'saa', label: 'SAA citations', kinds: ['cite'], desc: 'SAA in-text citations, References Cited and radiocarbon dates'}
+  {key: 'saa', label: 'SAA citations', kinds: ['cite'], desc: 'SAA in-text citations, References Cited and radiocarbon dates', excludes: 'aja'},
+  {key: 'aja', label: 'AJA', kinds: ['aja'], desc: 'Alaska Journal of Anthropology Style Guide (2018): citations, references, numbers, measurements, dates, place names', excludes: 'saa'}
 ];
-export function guideOn(key) { const g = STYLE_GUIDES.find(x => x.key === key); return settings().enabled[g.kinds[0]] !== false; }
+export function guideOn(key) { const g = STYLE_GUIDES.find(x => x.key === key); const v = settings().enabled[g.kinds[0]]; return key === 'aja' ? v === true : v !== false; }
 export function applyGuideVisibility() {
   const dt = document.querySelector('#doctype'); if (dt) dt.classList.toggle('hidden', !guideOn('nepa'));
   const care = document.querySelector('#care'); if (care) care.classList.toggle('hidden', !guideOn('care'));
+  const aja = document.querySelector('#aja'); if (aja && !guideOn('aja')) aja.classList.add('hidden');
 }
 export function fillGuides(box) {
   if (!box) return;
@@ -51,9 +53,18 @@ export function fillGuides(box) {
   for (const g of STYLE_GUIDES) {
     const cb = el('input', {type: 'checkbox', 'aria-label': 'Include ' + g.label});
     cb.checked = guideOn(g.key);
-    const lab = el('label', {class: 'guide-toggle' + (cb.checked ? ' on' : ''), title: (cb.checked ? 'Included: ' : 'Left out: ') + g.desc}, cb, g.label);
+    const lab = el('label', {class: 'guide-toggle' + (cb.checked ? ' on' : ''), 'data-guide': g.key, title: (cb.checked ? 'Included: ' : 'Left out: ') + g.desc}, cb, g.label);
     cb.onchange = () => {
       const patch = {}; for (const k of g.kinds) patch[k] = cb.checked;
+      if (cb.checked && g.excludes) {           // SAA and AJA citation rules conflict: switching one on switches the other off
+        const other = STYLE_GUIDES.find(x => x.key === g.excludes);
+        if (guideOn(other.key)) {
+          for (const k of other.kinds) patch[k] = false;
+          const ol = [...box.querySelectorAll('label')].find(l => l.dataset.guide === other.key);
+          if (ol) { ol.querySelector('input').checked = false; ol.classList.remove('on'); }
+          toast(other.label + ' switched off: SAA and AJA citation rules differ, so one is used at a time.');
+        }
+      }
       saveSettings({enabled: patch});
       lab.classList.toggle('on', cb.checked); lab.title = (cb.checked ? 'Included: ' : 'Left out: ') + g.desc;
       applyGuideVisibility();
@@ -86,6 +97,21 @@ export function renderCare(box, checklist, issues) {
     el('div', {class: 'legend', style: 'margin-top:6px'}, 'CARE Principles (GIDA 2019; Carroll et al. 2020). These are prompts for your judgment and for consultation with the community, not rulings.'));
 }
 
+// AJA checklist panel (shown when the AJA guide is switched on).
+export function renderAja(box, items, types, onType) {
+  if (!box) return;
+  if (!guideOn('aja')) { box.innerHTML = ''; box.classList.add('hidden'); return; }
+  box.classList.remove('hidden'); box.innerHTML = '';
+  const sel = el('select', {'aria-label': 'AJA submission type'});
+  for (const [k, v] of Object.entries(types)) sel.append(el('option', {value: k}, v.label));
+  sel.value = settings().ajaType || 'article';
+  sel.onchange = () => { saveSettings({ajaType: sel.value}); onType && onType(); };
+  box.append(el('div', {class: 'care-head'}, el('b', {}, 'AJA submission checklist '), sel));
+  for (const it of items) box.append(el('div', {class: 'craft-row' + (it.ok ? ' ok' : it.optional ? ' opt' : '')},
+    el('span', {class: 'craft-mark aja-mark'}, it.ok ? '✓' : it.optional ? '–' : '!'), el('span', {}, it.label)));
+  box.append(el('div', {class: 'legend', style: 'margin-top:6px'}, 'Alaska Journal of Anthropology Style Guide (2018). Also: 12-point Times New Roman, double spaced, page numbers bottom centre, no footnotes, figures in a separate file, references single spaced on a new page.'));
+}
+
 // Structure checklist from the BU Writing Guide in Archaeology, plus the writing-habit reminder.
 export function renderCraft(box, items) {
   box.innerHTML = '';
@@ -96,7 +122,7 @@ export function renderCraft(box, items) {
     'Paragraphs: 2 to 7 sentences, hamburger style (topic sentence, support, closing sentence). Write a little every day; habit makes the article (Alexandria Archive Institute, 30 Days to an Article).'));
 }
 
-const KIND_ORDER = ['care', 'spelling', 'grammar', 'concise', 'plain', 'scicomm', 'cite', 'voice', 'craft', 'nepa', 'personal'];
+const KIND_ORDER = ['care', 'spelling', 'grammar', 'concise', 'plain', 'scicomm', 'cite', 'aja', 'voice', 'craft', 'nepa', 'personal'];
 export function renderSummary(box, stats, issues, onToggle) {
   const st = settings();
   const counts = {}; for (const i of issues) counts[i.kind] = (counts[i.kind] || 0) + 1;

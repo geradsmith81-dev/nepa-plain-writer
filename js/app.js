@@ -1,7 +1,7 @@
 // NEPA Plain Writer - phone and desktop page (paste or type text from any program).
-import { initEngine, checkText, underlineSet, applyFix, docStats, careChecklist, craftChecklist } from './engine.js';
+import { initEngine, checkText, underlineSet, applyFix, docStats, careChecklist, craftChecklist, ajaChecklist, AJA_TYPES } from './engine.js';
 import { settings } from './store.js';
-import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderList, fillGuides, renderSettings } from './ui.js';
+import { $, el, toast, fillDocTypes, fillAudience, renderSummary, renderCare, renderCraft, renderAja, renderList, fillGuides, renderSettings } from './ui.js';
 
 const input = $('#input'), review = $('#review'), list = $('#list'), summary = $('#summary'), status = $('#status');
 let issues = [], ignored = new Set(), timer = null, running = false, again = false;
@@ -31,6 +31,7 @@ function draw() {
   review.innerHTML = html || '<span class="status">Your checked text appears here.</span>';
   renderCare($('#care'), careChecklist(text), vis);
   renderCraft($('#craft'), craftChecklist(text));
+  renderAja($('#aja'), ajaChecklist(text, settings().ajaType), AJA_TYPES, run);
   renderSummary(summary, docStats(text, {docType: settings().docType, wordsPerPage: settings().wordsPerPage}), vis, run);
   renderList(list, vis, handlers);
 }

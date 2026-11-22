@@ -26,6 +26,7 @@ export function checkOxford(text) {
   for (let i = 0; i < text.length; i++) { if (text[i] === '(') depth++; inParen[i] = depth > 0; if (text[i] === ')' && depth > 0) depth--; }
   for (const m of text.matchAll(SERIES)) {
     const items = m[1].split(/,\s+/).filter(Boolean);
+    if (/^(?:and|or|nor)\b/i.test(m[2]) || items.some(x => /^(?:and|or|nor)\b/i.test(x.trim()))) continue;   // the list already has its serial comma
     const first = items[0].trim();
     // One comma only ("A, B and C"): guard against introductory phrases such as "In 2001, Smith and Jones ...".
     if (items.length === 1 && (INTRO.test(first) || /^\w+ly$/i.test(first) || /^\d[\d,.]*$/.test(first) || first.split(/\s+/).length > 3)) continue;

@@ -2,8 +2,8 @@
 import { parseWordList, parseSwaps } from './rules.js';
 const KEY = 'nepa-plain-writer-v1';
 const DEFAULTS = {
-  words: [], swapsText: '', docType: 'ea', audience: 'technical', wordsPerPage: 500, longLimit: 25,
-  enabled: {care: true, spelling: true, grammar: true, concise: true, plain: true, scicomm: true, cite: true, voice: true, craft: true, nepa: true, personal: true, passive: true, filler: true, long: true}
+  words: [], swapsText: '', docType: 'ea', audience: 'technical', ajaType: 'article', wordsPerPage: 500, longLimit: 25,
+  enabled: {care: true, spelling: true, grammar: true, concise: true, plain: true, scicomm: true, cite: true, aja: false, voice: true, craft: true, nepa: true, personal: true, passive: true, filler: true, long: true}
 };
 let cache = null;
 export function settings() {
@@ -51,13 +51,13 @@ export function personalWordSet() {
   const s = new Set(); for (const w of [...settings().words, ...sharedWords]) s.add(w.toLowerCase()); return s;
 }
 export function exportBackup() {
-  const {words, swapsText, docType, audience, wordsPerPage, longLimit, enabled} = settings();
-  return JSON.stringify({app: 'NEPA Plain Writer', version: 2, words, swapsText, docType, audience, wordsPerPage, longLimit, enabled}, null, 1);
+  const {words, swapsText, docType, audience, ajaType, wordsPerPage, longLimit, enabled} = settings();
+  return JSON.stringify({app: 'NEPA Plain Writer', version: 3, words, swapsText, docType, audience, ajaType, wordsPerPage, longLimit, enabled}, null, 1);
 }
 export function importBackup(json) {
   const o = JSON.parse(json);
   if (o.words) addWords(o.words);
   const patch = {};
-  for (const k of ['swapsText', 'docType', 'audience', 'wordsPerPage', 'longLimit', 'enabled']) if (o[k] !== undefined) patch[k] = o[k];
+  for (const k of ['swapsText', 'docType', 'audience', 'ajaType', 'wordsPerPage', 'longLimit', 'enabled']) if (o[k] !== undefined) patch[k] = o[k];
   saveSettings(patch);
 }

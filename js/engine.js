@@ -8,6 +8,7 @@ import { checkCare, careChecklist } from './care.js';
 import { checkVoice } from './voice.js';
 import { checkSciComm } from './scicomm.js';
 import { checkGuides, craftChecklist } from './guides.js';
+import { checkAja, buildAjaIndex, isAjaRef, ajaChecklist, AJA_TYPES } from './aja.js';
 import { checkSaa, buildCiteIndex, isReferenceEntry } from './saa.js';
 import { settings, personalWordSet, allPersonalWords, setSharedWords } from './store.js';
 
@@ -68,7 +69,7 @@ function charToUnitMap(text) {
 }
 
 // Which flag wins where two overlap. Specific rules (CARE, SAA, your style) beat the general spell checker on the same words.
-const PRIORITY = {care: 0, cite: 1, voice: 2, craft: 3, spelling: 4, grammar: 5, personal: 6, nepa: 7, concise: 8, scicomm: 9, plain: 10};
+const PRIORITY = {care: 0, cite: 1, aja: 1, voice: 2, craft: 3, spelling: 4, grammar: 5, personal: 6, nepa: 7, concise: 8, scicomm: 9, plain: 10};
 
 export async function checkText(text, extra = {}) {
   await initEngine();
@@ -109,9 +110,12 @@ export async function checkText(text, extra = {}) {
   const docText = extra.docText || text;
   const ctx = {audience: st.audience, docText, seenSpecies: extra.seenSpecies, seenSentences: extra.seenSentences, seenJargon: extra.seenJargon,
                citeIndex: extra.citeIndex || buildCiteIndex(docText)};
-  ctx.isRef = isReferenceEntry(text, ctx.citeIndex);
+  ctx.ajaIndex = extra.ajaIndex || buildAjaIndex(docText);
+  ctx.isRef = isReferenceEntry(text, ctx.citeIndex) || isAjaRef(text, ctx.ajaIndex);
   if (st.enabled.care !== false && !ctx.isRef) issues.push(...checkCare(text, ctx));
-  if (st.enabled.cite !== false) issues.push(...checkSaa(text, ctx));
+  // SAA and AJA citation rules differ, so only one runs (the switches keep them exclusive; AJA wins if both are set).
+  if (st.enabled.aja === true) issues.push(...checkAja(text, ctx));
+  else if (st.enabled.cite !== false) issues.push(...checkSaa(text, ctx));
   if (st.enabled.voice !== false) issues.push(...checkVoice(text, ctx));
   if (st.enabled.scicomm !== false && !ctx.isRef) issues.push(...checkSciComm(text, ctx));
   if (st.enabled.craft !== false) issues.push(...checkGuides(text, ctx));
@@ -157,8 +161,8 @@ export function underlineSet(issues) {
 }
 
 export function applyFix(text, fix) { return text.slice(0, fix.start) + fix.text + text.slice(fix.end); }
-export { docStats, KIND_INFO, careChecklist, buildCiteIndex, craftChecklist };
+export { docStats, KIND_INFO, careChecklist, buildCiteIndex, craftChecklist, ajaChecklist, AJA_TYPES };
 // A fresh shared context for checking one document paragraph by paragraph.
 export function documentContext(docText) {
-  return {docText, knownAcronyms: new Set(), seenSpecies: new Set(), seenSentences: new Map(), seenJargon: new Set(), citeIndex: buildCiteIndex(docText)};
+  return {docText, knownAcronyms: new Set(), seenSpecies: new Set(), seenSentences: new Map(), seenJargon: new Set(), citeIndex: buildCiteIndex(docText), ajaIndex: buildAjaIndex(docText)};
 }
