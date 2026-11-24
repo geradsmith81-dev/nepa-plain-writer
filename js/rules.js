@@ -9,7 +9,7 @@ export const SOURCES = {
   CEQ_PLAIN: 'Former CEQ rule 40 CFR 1502.8 (plain language; rescinded April 2025, still standard agency practice)',
   FPLG: 'Federal Plain Language Guidelines (plainlanguage.gov), Plain Writing Act of 2010',
   ACRONYM: 'Plain language and agency NEPA style: define each acronym at first use',
-  PERSONAL: 'Your own word swaps (from your Grammarly history)'
+  PERSONAL: 'Your own word swaps'
 };
 
 export const KIND_INFO = {
@@ -355,7 +355,7 @@ export function docStats(text, opts = {}) {
           overLimit: dt.pages ? pages > dt.pages : false, wordsPerPage: wpp};
 }
 
-// Parse a pasted Grammarly personal dictionary (or any word list).
+// Parse a pasted word list (one per line, commas, or a copied page).
 export function parseWordList(raw) {
   const junk = /^(delete|remove|add|edit|search|cancel|save|personal dictionary|dictionary|words?|add word|customize|account|\d+\s*words?|[\W_]+)$/i;
   const out = new Set();

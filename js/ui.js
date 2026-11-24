@@ -203,11 +203,11 @@ export function renderList(box, issues, h) {
   for (const i of issues) box.append(issueCard(i, h));
 }
 
-// Settings: Grammarly personal dictionary import, word swaps, limits, and moving settings between devices.
+// Settings: my words, word swaps, limits, and moving settings between devices.
 export function renderSettings(box, onChange) {
   const st = settings();
   box.innerHTML = '';
-  const paste = el('textarea', {placeholder: 'Paste your Grammarly personal dictionary here. In Grammarly: Account, Customize, Personal dictionary; select the list and copy it. A messy paste is fine.'});
+  const paste = el('textarea', {placeholder: 'Add your own words (names, places, technical terms), one per line or separated by commas.'});
   const file = el('input', {type: 'file', accept: '.txt,.csv,.json'});
   const words = el('div', {class: 'wordlist'});
   const drawWords = () => {
@@ -229,13 +229,13 @@ export function renderSettings(box, onChange) {
   }
   const backupBox = el('textarea', {placeholder: 'Backup text appears here. Copy it, then paste it into this box on your other device and press Load backup.'});
   box.append(
-    el('label', {}, 'My words from Grammarly (never marked as misspelled)'),
+    el('label', {}, 'My words (never marked as misspelled)'),
     paste,
     el('div', {class: 'row', style: 'margin-top:6px'},
       el('button', {class: 'primary', onclick: () => { const n = addWords(paste.value); paste.value = ''; drawWords(); toast(n + ' word(s) added'); onChange(); }}, 'Add these words'),
       el('span', {class: 'legend'}, 'or load a text file:'), file),
     words,
-    el('label', {}, 'My word swaps (mistakes Grammarly kept catching)'),
+    el('label', {}, 'My word swaps (mistakes you often make)'),
     swaps,
     el('div', {class: 'row', style: 'margin-top:6px'}, el('button', {onclick: () => { saveSettings({swapsText: swaps.value}); toast('Swaps saved'); onChange(); }}, 'Save swaps')),
     el('label', {}, 'Checks'), toggles,

@@ -1,2 +1,2 @@
-# Your Grammarly personal dictionary goes here, one word per line.
+# Your own words go here, one word per line.
 # Words in this file are accepted on every device (Word, phone and desktop).
